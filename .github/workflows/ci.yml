@@ -41,7 +41,7 @@ jobs:
         with:
           config: p/java
       - name: SCA e misconfiguration scanning
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
@@ -56,13 +56,13 @@ jobs:
       - name: Build das imagens
         run: docker compose build
       - name: Scan do Identity Service
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: predit-identity-service:latest
           severity: CRITICAL
           exit-code: "1"
       - name: Scan do Risk Service
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: predit-risk-service:latest
           severity: CRITICAL
