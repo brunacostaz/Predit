@@ -1,6 +1,6 @@
 # Predit Backend
 
-**Plataforma de inteligencia para aumentar o VIN Share da Ford por meio de previsao de evasao, priorizacao de clientes e acoes de retencao.**
+**Plataforma de inteligência para aumentar o VIN Share da Ford por meio de previsão de evasão, priorização de clientes e ações de retenção.**
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.12-6DB33F?logo=springboot&logoColor=white)
@@ -9,83 +9,83 @@
 ![JWT](https://img.shields.io/badge/Security-JWT-111111?logo=jsonwebtokens&logoColor=white)
 ![Tests](https://img.shields.io/badge/Tests-12_passing-25A162?logo=junit5&logoColor=white)
 
-Predit e o backend do dashboard gerencial apresentado no Ford Challenge. A solucao consolida informacoes de clientes e veiculos, recebe resultados de modelos preditivos e transforma risco de evasao em uma fila clara de trabalho para a concessionaria.
+Predit é o backend do dashboard gerencial apresentado no Ford Challenge. A solução consolida informações de clientes e veículos, recebe resultados de modelos preditivos e transforma risco de evasão em uma fila clara de trabalho para a concessionária.
 
-O objetivo nao e apenas mostrar quem apresenta risco. O sistema explica **por que o cliente esta em risco**, indica **qual acao deve ser tomada** e permite acompanhar o resultado por meio de leads e campanhas.
+O objetivo não e apenas mostrar quem apresenta risco. O sistema explica **por que o cliente está em risco**, indica **qual ação deve ser tomada** e permite acompanhar o resultado por meio de leads e campanhas.
 
-> Este repositorio corresponde a entrega de Sprint 3 da disciplina de Arquitetura Orientada a Servicos e Web Services da FIAP.
+> Este repositório corresponde a entrega de Sprint 3 da disciplina de Arquitetura Orientada a Serviços e Web Services da FIAP.
 
 ---
 
-## Sumario
+## Sumário
 
-- [Contexto do projeto](#contexto-do-projeto)
-- [Solucao proposta](#solucao-proposta)
-- [Funcionalidades](#funcionalidades)
+- [Contexto do projeto](#Contexto-do-projeto)
+- [Solução proposta](#solução-proposta)
+- [Funcionalidades](#Funcionalidades)
 - [Arquitetura](#arquitetura)
-- [Como a IA participa da solucao](#como-a-ia-participa-da-solucao)
+- [Como a IA participa da solução](#como-a-ia-participa-da-solução)
 - [Tecnologias](#tecnologias)
-- [Modelo de dominio](#modelo-de-dominio)
-- [Seguranca e perfis de acesso](#seguranca-e-perfis-de-acesso)
+- [Modelo de domínio](#modelo-de-domínio)
+- [Segurança e perfis de acesso](#Segurança-e-perfis-de-acesso)
 - [Como executar com Docker](#como-executar-com-docker)
 - [Como demonstrar o projeto](#como-demonstrar-o-projeto)
 - [Endpoints](#endpoints)
-- [Exemplos de requisicao](#exemplos-de-requisicao)
+- [Exemplos de requisição](#exemplos-de-requisição)
 - [Erros e status HTTP](#erros-e-status-http)
 - [Testes automatizados](#testes-automatizados)
 - [Observabilidade](#observabilidade)
 - [Pipeline DevSecOps](#pipeline-devsecops)
-- [Estrutura do repositorio](#estrutura-do-repositorio)
-- [Documentacao complementar](#documentacao-complementar)
-- [Solucao de problemas](#solucao-de-problemas)
+- [Estrutura do repositório](#estrutura-do-repositório)
+- [Documentação complementar](#Documentação-complementar)
+- [Solução de problemas](#solução-de-problemas)
 
 ---
 
 ## Contexto do projeto
 
-VIN Share representa a parcela de veiculos Ford que continua utilizando a rede oficial para manutencoes e servicos. Quando um cliente deixa de retornar a concessionaria, a rede perde receita de pecas e mao de obra, reduz a oportunidade de relacionamento e pode comprometer a recompra futura.
+VIN Share representa a parcela de veículos Ford que continua utilizando a rede oficial para manutenções e serviços. Quando um cliente deixa de retornar a concessionária, a rede perde receita de peças e mão de obra, reduz a oportunidade de relacionamento e pode comprometer a recompra futura.
 
-O problema operacional e que os sinais de evasao ficam distribuidos entre historico de revisoes, garantia, quilometragem, interacoes e comportamento de atendimento. Sem uma visao consolidada, a concessionaria tende a agir apenas depois que o cliente ja deixou a rede.
+O problema operacional e que os sinais de evasão ficam distribuidos entre histórico de revisoes, garantia, quilometragem, interações e comportamento de atendimento. Sem uma visão consolidada, a concessionária tende a agir apenas depois que o cliente já deixou a rede.
 
 Predit organiza esses sinais em uma jornada proativa:
 
-1. um modelo analitico calcula o risco associado ao VIN;
+1. um modelo analítico calcula o risco associado ao VIN;
 2. a API registra o score e os fatores explicativos;
-3. o dashboard destaca clientes e modelos prioritarios;
-4. o gestor cria leads ou campanhas de retencao;
-5. a equipe acompanha contato, conversao e impacto potencial.
+3. o dashboard destaca clientes e modelos prioritários;
+4. o gestor cria leads ou campanhas de retenção;
+5. a equipe acompanha contato, conversão e impacto potencial.
 
-## Solucao proposta
+## Solução proposta
 
-A solucao foi dividida em dois microservicos independentes:
+A solução foi dividida em dois microserviços independentes:
 
-| Servico | Porta | Banco | Responsabilidade |
+| Serviço | Porta | Banco | Responsabilidade |
 | --- | ---: | --- | --- |
-| `identity-service` | `8081` | `predit_identity` | usuarios, senhas, perfis, login e emissao de JWT |
-| `risk-service` | `8082` | `predit_risk` | clientes, veiculos, scores, dashboard, leads e campanhas |
+| `identity-service` | `8081` | `predit_identity` | usuários, senhas, perfis, login e emissão de JWT |
+| `risk-service` | `8082` | `predit_risk` | clientes, veículos, scores, dashboard, leads e campanhas |
 
-Cada servico possui banco proprio e migrations independentes. O Risk Service nao consulta tabelas do Identity Service: ele valida localmente a assinatura, o emissor, a expiracao e os perfis presentes no JWT.
+Cada Serviço possui banco próprio e migrations independentes. O Risk Service não consulta tabelas do Identity Service: ele valida localmente a assinatura, o emissor, a expiração e os perfis presentes no JWT.
 
 ## Funcionalidades
 
-- autenticacao stateless com JWT de curta duracao;
+- autenticação stateless com JWT de curta duração;
 - controle de acesso por `ADMIN`, `MANAGER` e `ADVISOR`;
-- cadastro de clientes e veiculos identificados por VIN;
-- historico de avaliacoes preditivas com nome e versao do modelo;
-- explicacao dos fatores de risco e recomendacao de proxima acao;
-- filtros de clientes por risco, concessionaria, nome, email ou VIN;
-- dashboard com VIN Share, veiculos monitorados, risco medio e receita em risco;
-- distribuicao de risco e score medio por modelo;
-- criacao e acompanhamento de leads proativos;
-- planejamento e ativacao de campanhas de retencao;
-- validacao de consentimento para acoes de relacionamento;
-- documentacao interativa com OpenAPI e Swagger UI;
+- cadastro de clientes e veículos identificados por VIN;
+- histórico de avaliações preditivas com nome e versão do modelo;
+- explicação dos fatores de risco e recomendação de próxima ação;
+- filtros de clientes por risco, concessionária, nome, e-mail ou VIN;
+- dashboard com VIN Share, veículos monitorados, risco medio e receita em risco;
+- distribuição de risco e score medio por modelo;
+- criação e acompanhamento de leads proativos;
+- planejamento e ativacao de campanhas de retenção;
+- validação de consentimento para ações de relacionamento;
+- Documentação interativa com OpenAPI e Swagger UI;
 - respostas de erro padronizadas com `application/problem+json`;
 - logs JSON com correlation ID;
-- metricas para Prometheus e health checks com Spring Actuator;
-- migrations Flyway e dados ficticios para demonstracao;
-- execucao completa com Docker Compose;
-- pipeline com testes e verificacoes de seguranca.
+- métricas para Prometheus e health checks com Spring Actuator;
+- migrations Flyway e dados ficticios para demonstração;
+- Execução completa com Docker Compose;
+- pipeline com testes e verificações de Segurança.
 
 ---
 
@@ -112,44 +112,44 @@ flowchart LR
     RISK --> RISKDB
 ```
 
-### Fluxo de autenticacao
+### Fluxo de autenticação
 
-1. O usuario envia email e senha para `POST /api/v1/auth/login`.
-2. O Identity Service localiza o usuario e compara a senha com o hash BCrypt.
+1. O usuário envia e-mail e senha para `POST /api/v1/auth/login`.
+2. O Identity Service localiza o usuário e compara a senha com o hash BCrypt.
 3. Um JWT HS256 e emitido com `sub`, `iss`, `iat`, `exp`, `email`, `name` e `roles`.
 4. O cliente envia o token no header `Authorization: Bearer <token>`.
-5. O Risk Service valida assinatura, emissor e expiracao sem acessar o banco de identidade.
+5. O Risk Service valida assinatura, emissor e expiração sem acessar o banco de identidade.
 6. Spring Security aplica a regra do endpoint e do perfil autenticado.
 
-### Separacao de responsabilidades
+### Separação de responsabilidades
 
 | Camada | Responsabilidade |
 | --- | --- |
-| `api` | controllers, DTOs, validacao de entrada e contrato HTTP |
-| `service` | regras de negocio e coordenacao dos casos de uso |
-| `domain` | entidades, enums e repositories do dominio |
-| `config` | seguranca, OpenAPI e configuracao da aplicacao |
+| `api` | controllers, DTOs, validação de entrada e contrato HTTP |
+| `service` | regras de negócio e coordenação dos casos de uso |
+| `domain` | entidades, enums e repositories do domínio |
+| `config` | Segurança, OpenAPI e configuração da aplicação |
 | `security` | rate limit, correlation ID e apoio ao JWT |
-| `error` | excecoes de dominio e respostas RFC 9457 |
-| `db/migration` | criacao e evolucao versionada do schema |
+| `error` | exceções de domínio e respostas RFC 9457 |
+| `db/migration` | criação e evolução versionada do schema |
 
-O detalhamento dos componentes e diagramas de sequencia esta em [docs/architecture.md](docs/architecture.md).
+O detalhamento dos componentes e diagramas de sequência está em [docs/architecture.md](docs/architecture.md).
 
-## Como a IA participa da solucao
+## Como a IA participa da solução
 
-O modelo de machine learning fica desacoplado da API. Ele pode ser treinado e executado em Python, notebook ou plataforma de dados, desde que publique uma inferencia no contrato do Risk Service.
+O modelo de machine learning fica desacoplado da API. Ele pode ser treinado e executado em Python, notebook ou plataforma de dados, desde que publique uma inferência no contrato do Risk Service.
 
 Para cada veiculo, o modelo envia:
 
-- `score`: probabilidade operacional de evasao, de 0 a 100;
-- `reasons`: fatores que mais influenciaram a previsao;
-- `recommendedAction`: acao sugerida para a concessionaria;
-- `modelName`: identificacao do modelo;
-- `modelVersion`: versao usada para auditoria e comparacao.
+- `score`: probabilidade operacional de evasão, de 0 a 100;
+- `reasons`: fatores que mais influenciaram a previsão;
+- `recommendedAction`: ação sugerida para a concessionária;
+- `modelName`: identificação do modelo;
+- `modelVersion`: versão usada para auditoria e comparação.
 
-O backend calcula a faixa de risco a partir do score, preserva o historico da inferencia e disponibiliza os dados para o dashboard. Dessa forma, um novo modelo pode substituir o anterior sem alterar os demais recursos da plataforma.
+O backend calcula a faixa de risco a partir do score, preserva o histórico da inferência e disponibiliza os dados para o dashboard. Dessa forma, um novo modelo pode substituir o anterior sem alterar os demais recursos da plataforma.
 
-Importante: o score representa uma probabilidade para apoiar decisao humana. Ele nao e tratado como certeza nem dispara contato automaticamente.
+Importante: o score representa uma probabilidade para apoiar decisão humana. Ele não e tratado como certeza nem dispara contato automaticamente.
 
 ---
 
@@ -158,27 +158,27 @@ Importante: o score representa uma probabilidade para apoiar decisao humana. Ele
 | Tecnologia | Uso no projeto |
 | --- | --- |
 | Java 21 | linguagem principal |
-| Spring Boot 3.5.12 | base dos microservicos |
-| Apache Tomcat 10.1.60 | servidor HTTP embutido com correcoes de seguranca |
+| Spring Boot 3.5.12 | base dos microserviços |
+| Apache Tomcat 10.1.60 | servidor HTTP embutido com correcoes de Segurança |
 | Spring Web | APIs REST |
-| Spring Data JPA / Hibernate | persistencia e repositories |
-| Spring Security | autenticacao e autorizacao |
-| OAuth2 Resource Server | validacao de Bearer JWT |
-| JJWT | emissao de tokens no Identity Service |
-| Jakarta Validation | validacao de payloads |
-| PostgreSQL 17 | bancos dos servicos em Docker |
-| Flyway | versionamento do schema e seed de demonstracao |
+| Spring Data JPA / Hibernate | persistência e repositories |
+| Spring Security | autenticação e autorização |
+| OAuth2 Resource Server | validação de Bearer JWT |
+| JJWT | emissão de tokens no Identity Service |
+| Jakarta Validation | validação de payloads |
+| PostgreSQL 17 | bancos dos serviços em Docker |
+| Flyway | versionamento do schema e seed de demonstração |
 | H2 | testes e perfil local alternativo |
 | Springdoc OpenAPI | Swagger UI e contrato OpenAPI |
-| Spring Actuator | health, metricas e informacoes operacionais |
-| Micrometer Prometheus | exposicao de metricas do Risk Service |
+| Spring Actuator | health, métricas e informações operacionais |
+| Micrometer Prometheus | exposição de métricas do Risk Service |
 | Logstash Encoder | logs estruturados em JSON |
 | JUnit 5 / MockMvc | testes automatizados |
-| Maven | build multi-modulo e dependencias |
-| Docker / Compose | empacotamento e orquestracao local |
-| GitHub Actions | integracao continua e DevSecOps |
+| Maven | build multi-modulo e dependências |
+| Docker / Compose | empacotamento e orquestração local |
+| GitHub Actions | integração continua e DevSecOps |
 
-## Modelo de dominio
+## Modelo de domínio
 
 ```mermaid
 erDiagram
@@ -222,68 +222,68 @@ erDiagram
     }
 ```
 
-As campanhas representam estrategias por segmento e nao dependem de um unico cliente. Os dados de demonstracao incluem Ranger, Bronco, Maverick, Mustang e Territory em diferentes faixas de risco.
+As campanhas representam estratégias por segmento e não dependem de um único cliente. Os dados de demonstração incluem Ranger, Bronco, Maverick, Mustang e Territory em diferentes faixas de risco.
 
 ---
 
-## Seguranca e perfis de acesso
+## Segurança e perfis de acesso
 
 ### Perfis
 
-| Operacao | ADMIN | MANAGER | ADVISOR |
+| Operação | ADMIN | MANAGER | ADVISOR |
 | --- | :---: | :---: | :---: |
 | consultar dashboard, clientes, leads e campanhas | sim | sim | sim |
-| criar usuarios | sim | nao | nao |
-| cadastrar cliente e veiculo | sim | sim | nao |
-| registrar inferencia do modelo | sim | sim | nao |
-| criar lead | sim | sim | nao |
+| criar usuários | sim | não | não |
+| cadastrar cliente e veiculo | sim | sim | não |
+| registrar inferência do modelo | sim | sim | não |
+| criar lead | sim | sim | não |
 | atualizar status de lead | sim | sim | sim |
-| criar ou ativar campanha | sim | sim | nao |
+| criar ou ativar campanha | sim | sim | não |
 
 ### Controles implementados
 
 - senhas com BCrypt fator 12;
-- JWT HS256 com emissor e expiracao de 30 minutos;
-- API stateless, sem sessao de servidor;
-- autorizacao por endpoint e por metodo com `@PreAuthorize`;
-- CORS com origens permitidas por configuracao;
+- JWT HS256 com emissor e expiração de 30 minutos;
+- API stateless, sem sessão de servidor;
+- autorização por endpoint e por método com `@PreAuthorize`;
+- CORS com origens permitidas por configuração;
 - CSP, bloqueio de frames e headers seguros;
 - rate limit por origem;
-- validacao de tamanho, formato, email, VIN e limites numericos;
-- mensagens de autenticacao sem expor detalhes internos;
-- segredos e senhas recebidos por variaveis de ambiente;
-- containers executados por usuario sem privilegios;
+- validação de tamanho, formato, e-mail, VIN e limites numéricos;
+- mensagens de autenticação sem expor detalhes internos;
+- segredos e senhas recebidos por variáveis de ambiente;
+- containers executados por usuário sem privilégios;
 - filesystem dos containers em modo somente leitura;
 - logs sem senha ou token;
 - consentimento registrado para campanhas de relacionamento.
 
-A analise STRIDE, o mapeamento OWASP/LGPD e o plano de resposta a incidentes estao em [docs/security.md](docs/security.md).
+A análise STRIDE, o mapeamento OWASP/LGPD e o plano de resposta a incidentes estão em [docs/security.md](docs/security.md).
 
 ---
 
 ## Como executar com Docker
 
-### 1. Pre-requisitos
+### 1. Pré-requisitos
 
 - Git;
 - Docker Desktop com Docker Compose;
 - Java 21 apenas se quiser compilar e executar os testes fora do Docker.
 
-Confirme as instalacoes:
+Confirme as instalações:
 
 ```powershell
 docker version
 docker compose version
 ```
 
-### 2. Clonar o repositorio
+### 2. Clonar o repositório
 
 ```powershell
 git clone https://github.com/brunacostaz/Predit.git
 cd Predit
 ```
 
-### 3. Configurar variaveis
+### 3. Configurar variáveis
 
 Crie o arquivo `.env` a partir do exemplo:
 
@@ -291,18 +291,18 @@ Crie o arquivo `.env` a partir do exemplo:
 Copy-Item .env.example .env
 ```
 
-Variaveis disponiveis:
+Variáveis disponíveis:
 
-| Variavel | Finalidade | Valor local de exemplo |
+| Variável | Finalidade | Valor local de exemplo |
 | --- | --- | --- |
-| `JWT_SECRET` | chave compartilhada para assinar e validar JWT | minimo de 32 caracteres |
-| `ADMIN_EMAIL` | email do administrador inicial | `admin@predit.com.br` |
+| `JWT_SECRET` | chave compartilhada para assinar e validar JWT | mínimo de 32 caracteres |
+| `ADMIN_EMAIL` | e-mail do administrador inicial | `admin@predit.com.br` |
 | `ADMIN_PASSWORD` | senha inicial do administrador | `ChangeMe123!` |
 | `IDENTITY_DB_PASSWORD` | senha do banco de identidade | `identity_dev_password` |
 | `RISK_DB_PASSWORD` | senha do banco de risco | `risk_dev_password` |
 | `VIN_SHARE_PERCENT` | indicador de referencia do dashboard | `68.0` |
 
-Os valores padrao existem somente para demonstracao local. Troque todos os segredos antes de qualquer ambiente compartilhado.
+Os valores padrão existem somente para demonstração local. Troque todos os segredos antes de qualquer ambiente compartilhado.
 
 ### 4. Opcional: executar os testes localmente
 
@@ -310,7 +310,7 @@ Os valores padrao existem somente para demonstracao local. Troque todos os segre
 .\mvnw.cmd clean verify
 ```
 
-Esse passo exige Java 21, mas nao e necessario para subir o Compose. Os Dockerfiles fazem o build em uma etapa isolada e copiam somente o JAR para a imagem final.
+Esse passo exige Java 21, mas não e necessário para subir o Compose. Os Dockerfiles fazem o build em uma etapa isolada e copiam somente o JAR para a imagem final.
 
 Os JARs locais sao gerados em:
 
@@ -357,7 +357,7 @@ docker compose logs -f identity-service risk-service
 docker compose down
 ```
 
-Para tambem apagar os volumes e reiniciar os dados ficticios:
+Para também apagar os volumes e reiniciar os dados ficticios:
 
 ```powershell
 docker compose down -v
@@ -365,7 +365,7 @@ docker compose down -v
 
 ### Alternativa sem Docker
 
-O perfil `demo` usa H2 em memoria. Abra dois terminais na raiz:
+O perfil `demo` usa H2 em memória. Abra dois terminais na raiz:
 
 ```powershell
 .\mvnw.cmd -pl identity-service spring-boot:run "-Dspring-boot.run.profiles=demo"
@@ -390,17 +390,17 @@ Perfil: ADMIN
 ### Fluxo recomendado no Swagger
 
 1. Abra o Swagger do Identity Service.
-2. Execute `POST /api/v1/auth/login` com a credencial inicial.
+2. Execute `POST /api/v1/auth/login` com a Credencial inicial.
 3. Copie o campo `accessToken` da resposta.
 4. Abra o Swagger do Risk Service e clique em **Authorize**.
 5. Informe `Bearer <accessToken>`.
 6. Execute `GET /api/v1/dashboard/summary` para mostrar os indicadores.
-7. Execute `GET /api/v1/customers?riskLevel=CRITICAL` para localizar clientes prioritarios.
-8. Abra um cliente e mostre score, explicacao, acao e versao do modelo.
+7. Execute `GET /api/v1/customers?riskLevel=CRITICAL` para localizar clientes prioritários.
+8. Abra um cliente e mostre score, explicação, ação e versão do modelo.
 9. Consulte `GET /api/v1/leads` e atualize um lead com `PATCH`.
 10. Consulte `GET /api/v1/campaigns` e ative uma campanha.
 
-O arquivo [http/predit-api.http](http/predit-api.http) contem o mesmo roteiro pronto para IntelliJ IDEA ou VS Code com REST Client.
+O arquivo [http/predit-api.http](http/predit-api.http) contém o mesmo roteiro pronto para IntelliJ IDEA ou VS Code com REST Client.
 
 ---
 
@@ -408,25 +408,25 @@ O arquivo [http/predit-api.http](http/predit-api.http) contem o mesmo roteiro pr
 
 ### Identity Service
 
-| Metodo | Endpoint | Acesso | Status de sucesso | Finalidade |
+| Método | Endpoint | Acesso | Status de sucesso | Finalidade |
 | --- | --- | --- | ---: | --- |
-| `POST` | `/api/v1/auth/login` | publico | `200` | autenticar e emitir JWT |
-| `GET` | `/api/v1/users` | ADMIN | `200` | listar usuarios internos |
-| `POST` | `/api/v1/users` | ADMIN | `201` | criar usuario e definir perfil |
+| `POST` | `/api/v1/auth/login` | público | `200` | autenticar e emitir JWT |
+| `GET` | `/api/v1/users` | ADMIN | `200` | listar usuários internos |
+| `POST` | `/api/v1/users` | ADMIN | `201` | criar usuário e definir perfil |
 
 ### Risk Service
 
-| Metodo | Endpoint | Acesso | Status de sucesso | Finalidade |
+| Método | Endpoint | Acesso | Status de sucesso | Finalidade |
 | --- | --- | --- | ---: | --- |
 | `GET` | `/api/v1/dashboard/summary` | todos | `200` | consolidar indicadores do dashboard |
 | `GET` | `/api/v1/customers` | todos | `200` | listar e filtrar clientes |
 | `GET` | `/api/v1/customers/{id}` | todos | `200` | detalhar cliente, veiculo e risco atual |
 | `POST` | `/api/v1/customers` | ADMIN, MANAGER | `201` | cadastrar cliente e veiculo |
-| `POST` | `/api/v1/customers/{customerId}/vehicles/{vehicleId}/risk-assessments` | ADMIN, MANAGER | `201` | registrar inferencia do modelo |
+| `POST` | `/api/v1/customers/{customerId}/vehicles/{vehicleId}/risk-assessments` | ADMIN, MANAGER | `201` | registrar inferência do modelo |
 | `GET` | `/api/v1/leads` | todos | `200` | listar oportunidades priorizadas |
 | `POST` | `/api/v1/leads` | ADMIN, MANAGER | `201` | criar lead proativo |
-| `PATCH` | `/api/v1/leads/{id}/status` | todos | `200` | atualizar andamento e responsavel |
-| `GET` | `/api/v1/campaigns` | todos | `200` | listar campanhas de retencao |
+| `PATCH` | `/api/v1/leads/{id}/status` | todos | `200` | atualizar andamento e responsável |
+| `GET` | `/api/v1/campaigns` | todos | `200` | listar campanhas de retenção |
 | `POST` | `/api/v1/campaigns` | ADMIN, MANAGER | `201` | planejar campanha |
 | `PATCH` | `/api/v1/campaigns/{id}/status` | ADMIN, MANAGER | `200` | alterar estado da campanha |
 
@@ -440,7 +440,7 @@ GET /api/v1/customers?query=Ranger
 
 ---
 
-## Exemplos de requisicao
+## Exemplos de requisição
 
 ### Login
 
@@ -466,7 +466,7 @@ Resposta resumida:
 }
 ```
 
-### Cadastro de cliente e veiculo
+### Cadastro de cliente e veículo
 
 ```json
 {
@@ -484,7 +484,7 @@ Resposta resumida:
 }
 ```
 
-### Registro de inferencia
+### Registro de inferência
 
 ```json
 {
@@ -498,14 +498,14 @@ Resposta resumida:
 
 Faixas geradas pelo backend:
 
-| Score | Nivel |
+| Score | Nível |
 | ---: | --- |
 | `0-39` | `LOW` |
 | `40-59` | `MEDIUM` |
 | `60-79` | `HIGH` |
 | `80-100` | `CRITICAL` |
 
-### Criacao de lead
+### Criação de lead
 
 ```json
 {
@@ -518,7 +518,7 @@ Faixas geradas pelo backend:
 }
 ```
 
-### Atualizacao de lead
+### Atualização de lead
 
 ```json
 {
@@ -527,7 +527,7 @@ Faixas geradas pelo backend:
 }
 ```
 
-### Criacao de campanha
+### Criação de campanha
 
 ```json
 {
@@ -545,18 +545,18 @@ Faixas geradas pelo backend:
 
 ## Erros e status HTTP
 
-A API usa os metodos e status do nivel 2 de maturidade REST:
+A API usa os métodos e status do Nível 2 de maturidade REST:
 
 | Status | Quando ocorre |
 | ---: | --- |
-| `200 OK` | consulta ou atualizacao concluida |
+| `200 OK` | consulta ou Atualização concluída |
 | `201 Created` | recurso criado com header `Location` |
-| `400 Bad Request` | payload invalido ou regra de formato violada |
-| `401 Unauthorized` | token ausente, invalido ou expirado |
-| `403 Forbidden` | perfil autenticado sem permissao |
+| `400 Bad Request` | payload inválido ou regra de formato violada |
+| `401 Unauthorized` | token ausente, inválido ou expirado |
+| `403 Forbidden` | perfil autenticado sem permissão |
 | `404 Not Found` | recurso inexistente |
-| `409 Conflict` | email, VIN ou regra unica em conflito |
-| `429 Too Many Requests` | limite de requisicoes excedido |
+| `409 Conflict` | e-mail, VIN ou regra unica em conflito |
+| `429 Too Many Requests` | limite de requisições excedido |
 
 Exemplo `application/problem+json`:
 
@@ -576,7 +576,7 @@ Exemplo `application/problem+json`:
 
 ## Testes automatizados
 
-Execute toda a verificacao:
+Execute toda a verificação:
 
 ```powershell
 .\mvnw.cmd clean verify
@@ -584,22 +584,22 @@ Execute toda a verificacao:
 
 Cobertura funcional atual:
 
-- login correto e emissao de JWT;
-- validacao de claims, perfil e expiracao;
+- login correto e emissão de JWT;
+- validação de claims, perfil e expiração;
 - credenciais invalidas;
-- payload invalido;
+- payload inválido;
 - acesso anonimo ao dashboard;
 - consulta autenticada dos indicadores;
-- permissao de MANAGER para criar cliente;
-- bloqueio de ADVISOR na mesma operacao;
-- criacao autorizada de campanha;
+- permissão de MANAGER para criar cliente;
+- bloqueio de ADVISOR na mesma Operação;
+- criação autorizada de campanha;
 - bloqueio de campanha por perfil;
-- campanha invalida e recurso inexistente;
-- aplicacao integral das migrations Flyway.
+- campanha inválida e recurso inexistente;
+- aplicação integral das migrations Flyway.
 
 Resultado validado em 27/09/2026: **12 testes, 0 falhas e 0 erros**.
 
-Relatorios:
+Relatórios:
 
 ```text
 identity-service/target/surefire-reports
@@ -610,34 +610,34 @@ Veja a matriz completa em [docs/test-evidence.md](docs/test-evidence.md).
 
 ## Observabilidade
 
-Os servicos geram logs JSON adequados para coleta por ferramentas como Grafana Loki, Elastic Stack ou Azure Monitor. O Risk Service aceita ou cria o header `X-Correlation-ID`, devolve o identificador na resposta e o inclui nos logs.
+Os serviços geram logs JSON adequados para coleta por ferramentas como Grafana Loki, Elastic Stack ou Azure Monitor. O Risk Service aceita ou cria o header `X-Correlation-ID`, devolve o identificador na resposta e o inclui nos logs.
 
-Sinais disponiveis:
+Sinais disponíveis:
 
 - disponibilidade via `/actuator/health`;
-- metricas JVM e HTTP via Actuator;
+- métricas JVM e HTTP via Actuator;
 - endpoint Prometheus no Risk Service;
-- falhas de autenticacao e autorizacao;
-- eventos de criacao e alteracao de leads e campanhas;
-- headers de limite e saldo de requisicoes.
+- falhas de autenticação e autorização;
+- eventos de criação e alteração de leads e campanhas;
+- headers de limite e saldo de requisições.
 
 ## Pipeline DevSecOps
 
 O workflow `.github/workflows/ci.yml` executa em push para `main`, `develop` e pull requests:
 
 1. build e testes com Java 21;
-2. publicacao dos relatorios Surefire;
+2. publicação dos Relatórios Surefire;
 3. Gitleaks para secret scanning;
 4. Semgrep para SAST;
-5. Trivy para dependencias e configuracoes;
+5. Trivy para dependências e configurações;
 6. build das duas imagens Docker;
-7. scan de vulnerabilidades criticas nas imagens.
+7. scan de vulnerabilidades críticas nas imagens.
 
 O pipeline falha quando encontra erro de teste ou vulnerabilidade acima do limite configurado.
 
 ---
 
-## Estrutura do repositorio
+## Estrutura do repositório
 
 ```text
 Predit/
@@ -666,19 +666,19 @@ Predit/
 `-- README.md
 ```
 
-## Documentacao complementar
+## Documentação complementar
 
-| Documento | Conteudo |
+| Documento | Conteúdo |
 | --- | --- |
-| [Arquitetura](docs/architecture.md) | componentes, responsabilidades e fluxos de autenticacao e predicao |
-| [Seguranca](docs/security.md) | controles, STRIDE, LGPD, observabilidade e resposta a incidentes |
-| [Mapa da rubrica](docs/rubric.md) | requisito da Sprint 3, evidencia no codigo e forma de demonstrar |
-| [Evidencia de testes](docs/test-evidence.md) | cenarios automatizados e resultado da ultima execucao |
-| [Colecao HTTP](http/predit-api.http) | requisicoes prontas para demonstracao |
+| [Arquitetura](docs/architecture.md) | componentes, responsabilidades e fluxos de autenticação e predição |
+| [Segurança](docs/security.md) | controles, STRIDE, LGPD, observabilidade e resposta a incidentes |
+| [Mapa da rubrica](docs/rubric.md) | requisito da Sprint 3, Evidência no código e forma de demonstrar |
+| [Evidência de testes](docs/test-evidence.md) | cenários automatizados e resultado da última Execução |
+| [Coleção HTTP](http/predit-api.http) | requisições prontas para demonstração |
 
-## Solucao de problemas
+## Solução de problemas
 
-### `docker` nao e reconhecido
+### `docker` não é reconhecido
 
 Abra o Docker Desktop e reinicie o terminal para atualizar o `PATH`. Confirme com `docker version`.
 
@@ -690,9 +690,9 @@ Identifique o processo:
 Get-NetTCPConnection -LocalPort 8081,8082 -ErrorAction SilentlyContinue
 ```
 
-Encerre o processo responsavel ou altere o mapeamento de portas no `compose.yaml`.
+Encerre o processo responsável ou altere o mapeamento de portas no `compose.yaml`.
 
-### Banco nao fica saudavel
+### Banco não fica saudável
 
 Consulte os logs:
 
@@ -712,14 +712,12 @@ docker compose up --build -d
 Confirme que:
 
 - o header usa `Bearer` antes do token;
-- o token nao expirou;
-- os dois servicos usam o mesmo `JWT_SECRET`;
+- o token não expirou;
+- os dois serviços usam o mesmo `JWT_SECRET`;
 - o issuer e `predit-identity`.
 
 ### Endpoint retorna 403
 
-O token e valido, mas o perfil nao possui permissao. Consulte a [matriz de acesso](#perfis).
+O token e válido, mas o perfil não possui permissão. Consulte a [matriz de acesso](#perfis).
 
 ---
-
-Todos os nomes, VINs, scores, estimativas e valores incluidos nas migrations sao ficticios e destinados exclusivamente a demonstracao academica. Predit e um prototipo e nao representa uma integracao oficial com sistemas internos da Ford.
