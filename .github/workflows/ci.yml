@@ -1,0 +1,69 @@
+name: Predit DevSecOps
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Testes automatizados
+        run: ./mvnw --batch-mode clean verify
+      - name: Evidencias dos testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: "**/target/surefire-reports/**"
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secret scanning
+        uses: gitleaks/gitleaks-action@v2
+      - name: SAST
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: p/java
+      - name: SCA e misconfiguration scanning
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+  containers:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build das imagens
+        run: docker compose build
+      - name: Scan do Identity Service
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: predit-identity-service:latest
+          severity: CRITICAL
+          exit-code: "1"
+      - name: Scan do Risk Service
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: predit-risk-service:latest
+          severity: CRITICAL
+          exit-code: "1"
