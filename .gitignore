@@ -1,0 +1,10 @@
+target/
+.mvn/wrapper/dists/
+.idea/
+.vscode/
+*.iml
+.env
+dependency-check-data/
+reports/
+*.log
+
