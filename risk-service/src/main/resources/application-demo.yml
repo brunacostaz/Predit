@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:predit_risk_demo;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+predit:
+  jwt:
+    secret: demo-only-secret-with-at-least-32-characters-long
