@@ -1,0 +1,10 @@
+.git
+.github
+.env
+.idea
+.vscode
+.mvn/wrapper/dists
+**/target
+docs
+http
+README.md

@@ -266,12 +266,11 @@ A analise STRIDE, o mapeamento OWASP/LGPD e o plano de resposta a incidentes est
 
 - Git;
 - Docker Desktop com Docker Compose;
-- Java 21 apenas para compilar e executar os testes localmente.
+- Java 21 apenas se quiser compilar e executar os testes fora do Docker.
 
 Confirme as instalacoes:
 
 ```powershell
-java -version
 docker version
 docker compose version
 ```
@@ -304,13 +303,15 @@ Variaveis disponiveis:
 
 Os valores padrao existem somente para demonstracao local. Troque todos os segredos antes de qualquer ambiente compartilhado.
 
-### 4. Compilar os servicos
+### 4. Opcional: executar os testes localmente
 
 ```powershell
-.\mvnw.cmd clean package
+.\mvnw.cmd clean verify
 ```
 
-Esse comando tambem executa os testes. Os JARs sao gerados em:
+Esse passo exige Java 21, mas nao e necessario para subir o Compose. Os Dockerfiles fazem o build em uma etapa isolada e copiam somente o JAR para a imagem final.
+
+Os JARs locais sao gerados em:
 
 ```text
 identity-service/target/identity-service-1.0.0.jar
