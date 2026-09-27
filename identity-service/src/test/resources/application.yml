@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:identity;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+
+predit:
+  jwt:
+    secret: unit-test-secret-with-at-least-32-characters-long
+    issuer: predit-identity
+    expiration-minutes: 30
+  bootstrap:
+    admin-email: admin@test.com
+    admin-password: Test123!
