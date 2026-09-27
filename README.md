@@ -3,7 +3,7 @@
 **Plataforma de inteligencia para aumentar o VIN Share da Ford por meio de previsao de evasao, priorizacao de clientes e acoes de retencao.**
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.5-6DB33F?logo=springboot&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.12-6DB33F?logo=springboot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![JWT](https://img.shields.io/badge/Security-JWT-111111?logo=jsonwebtokens&logoColor=white)
@@ -158,7 +158,7 @@ Importante: o score representa uma probabilidade para apoiar decisao humana. Ele
 | Tecnologia | Uso no projeto |
 | --- | --- |
 | Java 21 | linguagem principal |
-| Spring Boot 3.4.5 | base dos microservicos |
+| Spring Boot 3.5.12 | base dos microservicos |
 | Spring Web | APIs REST |
 | Spring Data JPA / Hibernate | persistencia e repositories |
 | Spring Security | autenticacao e autorizacao |
