@@ -159,6 +159,7 @@ Importante: o score representa uma probabilidade para apoiar decisao humana. Ele
 | --- | --- |
 | Java 21 | linguagem principal |
 | Spring Boot 3.5.12 | base dos microservicos |
+| Apache Tomcat 10.1.60 | servidor HTTP embutido com correcoes de seguranca |
 | Spring Web | APIs REST |
 | Spring Data JPA / Hibernate | persistencia e repositories |
 | Spring Security | autenticacao e autorizacao |
