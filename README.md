@@ -15,10 +15,20 @@ O objetivo não e apenas mostrar quem apresenta risco. O sistema explica **por q
 
 > Este repositório corresponde a entrega de Sprint 3 da disciplina de Arquitetura Orientada a Serviços e Web Services da FIAP.
 
+## Integrantes
+
+| Nome | RM |
+| --- | --- |
+| Bruna da Costa Candeias | RM558938 |
+| Fernando Navajas Moraes | RM555080 |
+| Gabriel Terra Lilla dos Santos | RM554575 |
+| José Guilherme Sipaúba Costa | RM557274 |
+| Weslley Cardoso | RM557927 |
 ---
 
 ## Sumário
 
+- [Integrantes](#integrantes)
 - [Contexto do projeto](#Contexto-do-projeto)
 - [Solução proposta](#solução-proposta)
 - [Funcionalidades](#Funcionalidades)
