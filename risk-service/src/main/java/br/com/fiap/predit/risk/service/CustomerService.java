@@ -53,10 +53,32 @@ public class CustomerService {
     }
 
     @Transactional
-    public RiskResponse assess(UUID vehicleId, CreateRiskRequest request) {
-        Vehicle vehicle = vehicles.findById(vehicleId).orElseThrow(() -> new NotFoundException("Vehicle not found"));
+    public RiskResponse assess(UUID customerId, UUID vehicleId, CreateRiskRequest request) {
+        Vehicle vehicle = vehicleOf(customerId, vehicleId);
         return RiskResponse.from(risks.save(new RiskAssessment(vehicle, request.score(), request.reasons(),
                 request.recommendedAction(), request.modelName(), request.modelVersion())));
+    }
+
+    @Transactional(readOnly = true)
+    public List<RiskResponse> assessments(UUID customerId, UUID vehicleId) {
+        vehicleOf(customerId, vehicleId);
+        return risks.findAllByVehicleIdOrderByAssessedAtDesc(vehicleId).stream().map(RiskResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public RiskResponse assessment(UUID customerId, UUID vehicleId, UUID assessmentId) {
+        vehicleOf(customerId, vehicleId);
+        return risks.findById(assessmentId)
+                .filter(risk -> risk.getVehicle().getId().equals(vehicleId))
+                .map(RiskResponse::from)
+                .orElseThrow(() -> new NotFoundException("Risk assessment not found"));
+    }
+
+    private Vehicle vehicleOf(UUID customerId, UUID vehicleId) {
+        if (!customers.existsById(customerId)) throw new NotFoundException("Customer not found");
+        return vehicles.findById(vehicleId)
+                .filter(vehicle -> vehicle.getCustomer().getId().equals(customerId))
+                .orElseThrow(() -> new NotFoundException("Vehicle not found for this customer"));
     }
 
     private boolean matchesQuery(CustomerDetailResponse detail, String query) {

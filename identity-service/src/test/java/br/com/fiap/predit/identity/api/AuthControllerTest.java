@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.Duration;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +56,29 @@ class AuthControllerTest {
         assertThat(jwt.getClaimAsString("email")).isEqualTo("manager@predit.com.br");
         assertThat(jwt.getClaimAsStringList("roles")).containsExactly("MANAGER");
         assertThat(jwt.getExpiresAt()).isAfter(Instant.now());
+        assertThat(jwt.getClaimAsString("iss")).isEqualTo("predit-identity");
+        assertThat(jwt.getSubject()).isNotBlank();
+        assertThat(jwt.getClaimAsString("name")).isEqualTo("Manager");
+        assertThat(Duration.between(jwt.getIssuedAt(), jwt.getExpiresAt())).isEqualTo(Duration.ofMinutes(30));
+        assertThat(jwt.getClaims()).doesNotContainKeys("password", "passwordHash");
+    }
+
+    @Test
+    void shouldRejectUnknownUserWithSameMessage() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new LoginRequest("ghost@predit.com.br", "Strong123!"))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.detail").value("Email or password is invalid"));
+    }
+
+    @Test
+    void shouldRejectMalformedJson() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{bad"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Malformed request"));
     }
 
     @Test

@@ -7,7 +7,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![JWT](https://img.shields.io/badge/Security-JWT-111111?logo=jsonwebtokens&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-12_passing-25A162?logo=junit5&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-57_passing-25A162?logo=junit5&logoColor=white)
 
 Predit é o backend do dashboard gerencial apresentado no Ford Challenge. A solução consolida informações de clientes e veículos, recebe resultados de modelos preditivos e transforma risco de evasão em uma fila clara de trabalho para a concessionária.
 
@@ -412,6 +412,7 @@ O arquivo [http/predit-api.http](http/predit-api.http) contém o mesmo roteiro p
 | --- | --- | --- | ---: | --- |
 | `POST` | `/api/v1/auth/login` | público | `200` | autenticar e emitir JWT |
 | `GET` | `/api/v1/users` | ADMIN | `200` | listar usuários internos |
+| `GET` | `/api/v1/users/{id}` | ADMIN | `200` | consultar usuário |
 | `POST` | `/api/v1/users` | ADMIN | `201` | criar usuário e definir perfil |
 
 ### Risk Service
@@ -422,13 +423,19 @@ O arquivo [http/predit-api.http](http/predit-api.http) contém o mesmo roteiro p
 | `GET` | `/api/v1/customers` | todos | `200` | listar e filtrar clientes |
 | `GET` | `/api/v1/customers/{id}` | todos | `200` | detalhar cliente, veiculo e risco atual |
 | `POST` | `/api/v1/customers` | ADMIN, MANAGER | `201` | cadastrar cliente e veiculo |
+| `GET` | `/api/v1/customers/{customerId}/vehicles/{vehicleId}/risk-assessments` | todos | `200` | histórico de inferências do veículo |
+| `GET` | `/api/v1/customers/{customerId}/vehicles/{vehicleId}/risk-assessments/{id}` | todos | `200` | consultar uma inferência |
 | `POST` | `/api/v1/customers/{customerId}/vehicles/{vehicleId}/risk-assessments` | ADMIN, MANAGER | `201` | registrar inferência do modelo |
 | `GET` | `/api/v1/leads` | todos | `200` | listar oportunidades priorizadas |
+| `GET` | `/api/v1/leads/{id}` | todos | `200` | consultar lead |
 | `POST` | `/api/v1/leads` | ADMIN, MANAGER | `201` | criar lead proativo |
 | `PATCH` | `/api/v1/leads/{id}/status` | todos | `200` | atualizar andamento e responsável |
 | `GET` | `/api/v1/campaigns` | todos | `200` | listar campanhas de retenção |
+| `GET` | `/api/v1/campaigns/{id}` | todos | `200` | consultar campanha |
 | `POST` | `/api/v1/campaigns` | ADMIN, MANAGER | `201` | planejar campanha |
 | `PATCH` | `/api/v1/campaigns/{id}/status` | ADMIN, MANAGER | `200` | alterar estado da campanha |
+
+Todo `201 Created` devolve o header `Location` apontando para um `GET` existente. O veículo informado na URI precisa pertencer ao cliente; caso contrário a resposta é `404`.
 
 Filtros de clientes:
 
@@ -518,6 +525,8 @@ Faixas geradas pelo backend:
 }
 ```
 
+Regras: o veículo precisa pertencer ao cliente e o cliente precisa ter `contactConsent = true`; caso contrário a API responde `422`.
+
 ### Atualização de lead
 
 ```json
@@ -551,12 +560,18 @@ A API usa os métodos e status do Nível 2 de maturidade REST:
 | ---: | --- |
 | `200 OK` | consulta ou Atualização concluída |
 | `201 Created` | recurso criado com header `Location` |
-| `400 Bad Request` | payload inválido ou regra de formato violada |
-| `401 Unauthorized` | token ausente, inválido ou expirado |
+| `400 Bad Request` | payload inválido, JSON malformado ou parâmetro com tipo inválido |
+| `401 Unauthorized` | token ausente, inválido, adulterado, de outro emissor ou expirado |
 | `403 Forbidden` | perfil autenticado sem permissão |
-| `404 Not Found` | recurso inexistente |
-| `409 Conflict` | e-mail, VIN ou regra unica em conflito |
-| `429 Too Many Requests` | limite de requisições excedido |
+| `404 Not Found` | recurso ou endpoint inexistente |
+| `405 Method Not Allowed` | método HTTP não suportado pelo recurso |
+| `409 Conflict` | e-mail ou VIN já cadastrado |
+| `415 Unsupported Media Type` | corpo enviado sem `Content-Type: application/json` |
+| `422 Unprocessable Entity` | regra de negócio violada (consentimento, veículo de outro cliente) |
+| `429 Too Many Requests` | limite de requisições excedido (header `Retry-After`) |
+| `500 Internal Server Error` | erro inesperado, sem expor stack trace ou nomes internos |
+
+Todas as respostas de erro, inclusive as geradas pela camada de segurança, usam `application/problem+json` (RFC 9457) com `type`, `title`, `status`, `detail`, `instance` e `timestamp`.
 
 Exemplo `application/problem+json`:
 
@@ -566,6 +581,8 @@ Exemplo `application/problem+json`:
   "title": "Validation failed",
   "status": 400,
   "detail": "One or more fields are invalid",
+  "instance": "/api/v1/campaigns",
+  "timestamp": "2026-09-28T12:00:00Z",
   "errors": {
     "name": "must not be blank"
   }
@@ -582,22 +599,20 @@ Execute toda a verificação:
 .\mvnw.cmd clean verify
 ```
 
-Cobertura funcional atual:
+Cobertura funcional atual (57 testes):
 
-- login correto e emissão de JWT;
-- validação de claims, perfil e expiração;
-- credenciais invalidas;
-- payload inválido;
-- acesso anonimo ao dashboard;
-- consulta autenticada dos indicadores;
-- permissão de MANAGER para criar cliente;
-- bloqueio de ADVISOR na mesma Operação;
-- criação autorizada de campanha;
-- bloqueio de campanha por perfil;
-- campanha inválida e recurso inexistente;
+- **JWT real, sem mocks**: token válido aceito; ausente, expirado, assinado com outra chave, com payload adulterado, de outro emissor ou malformado recusado com `401`; token sem `roles` recebe `403`; a claim `roles` decide a autorização;
+- **emissão do JWT**: claims `sub`, `iss`, `iat`, `exp`, `email`, `name` e `roles`, validade exata de 30 minutos e ausência de dados sensíveis;
+- **login**: sucesso, senha errada, usuário inexistente com a mesma mensagem, payload inválido, JSON malformado e rate limit (`429` com `Retry-After`);
+- **usuários**: ADMIN cria e consulta via `Location`, e-mail duplicado (`409`), senha fraca (`400`), MANAGER bloqueado (`403`), anônimo (`401`), usuário inexistente (`404`);
+- **clientes e inferências**: criação com `Location`, VIN inválido, e-mail duplicado, cliente inexistente, registro e histórico de inferências, filtro por risco, veículo de outro cliente (`404`), ADVISOR bloqueado, score fora da faixa;
+- **leads**: criação e consulta, ADVISOR atualiza status, ADVISOR não cria, exigência de consentimento (`422`), veículo de outro cliente (`422`), lead inexistente;
+- **campanhas**: criação, consulta, ativação, perfil sem permissão, payload inválido, recurso inexistente;
+- **dashboard**: acesso anônimo recusado e indicadores para MANAGER;
+- **erros padronizados**: JSON malformado, UUID e enum inválidos sem vazar nomes de classes, `405`, `404` de rota, `415`, inclusive sobre HTTP real com Tomcat;
 - aplicação integral das migrations Flyway.
 
-Resultado validado em 27/09/2026: **12 testes, 0 falhas e 0 erros**.
+Resultado validado em 28/09/2026: **57 testes, 0 falhas e 0 erros**.
 
 Relatórios:
 

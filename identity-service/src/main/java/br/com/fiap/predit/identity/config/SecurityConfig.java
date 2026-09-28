@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.deny()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/actuator/health/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/error", "/actuator/health/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/users/**").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(errors -> errors

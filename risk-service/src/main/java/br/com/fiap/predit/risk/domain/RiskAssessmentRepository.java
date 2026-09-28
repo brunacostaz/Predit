@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface RiskAssessmentRepository extends JpaRepository<RiskAssessment, UUID> {
     Optional<RiskAssessment> findFirstByVehicleIdOrderByAssessedAtDesc(UUID vehicleId);
+    List<RiskAssessment> findAllByVehicleIdOrderByAssessedAtDesc(UUID vehicleId);
     long countByLevelIn(List<RiskLevel> levels);
 
     @Query("select avg(r.score) from RiskAssessment r where r.assessedAt = " +

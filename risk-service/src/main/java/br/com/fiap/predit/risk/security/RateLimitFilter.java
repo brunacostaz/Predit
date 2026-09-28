@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -14,9 +15,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
-    private static final int MAX_REQUESTS = 120;
     private static final long WINDOW_SECONDS = 60;
+    private final int maxRequests;
     private final ConcurrentHashMap<String, Window> windows = new ConcurrentHashMap<>();
+
+    public RateLimitFilter(@Value("${predit.rate-limit.requests-per-minute:120}") int maxRequests) {
+        this.maxRequests = maxRequests;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -26,12 +31,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
         long now = Instant.now().getEpochSecond();
         Window window = windows.compute(key, (ignored, current) -> current == null || now >= current.startedAt + WINDOW_SECONDS
                 ? new Window(now, 1) : new Window(current.startedAt, current.count + 1));
-        response.setHeader("X-RateLimit-Limit", String.valueOf(MAX_REQUESTS));
-        response.setHeader("X-RateLimit-Remaining", String.valueOf(Math.max(0, MAX_REQUESTS - window.count)));
-        if (window.count > MAX_REQUESTS) {
+        response.setHeader("X-RateLimit-Limit", String.valueOf(maxRequests));
+        response.setHeader("X-RateLimit-Remaining", String.valueOf(Math.max(0, maxRequests - window.count)));
+        if (window.count > maxRequests) {
             response.setStatus(429);
             response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-            response.getWriter().write("{\"title\":\"Too Many Requests\",\"status\":429}");
+            response.setHeader("Retry-After", String.valueOf(window.startedAt + WINDOW_SECONDS - now));
+            response.getWriter().write("{\"type\":\"https://predit.com.br/problems/429\",\"title\":\"Too Many Requests\","
+                    + "\"status\":429,\"detail\":\"Request limit exceeded, try again later\"}");
             return;
         }
         chain.doFilter(request, response);

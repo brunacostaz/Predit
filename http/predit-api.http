@@ -64,3 +64,51 @@ Content-Type: application/json
 {
   "status": "ACTIVE"
 }
+
+### Risk assessment history for Ana's Ranger
+GET http://localhost:8082/api/v1/customers/11111111-1111-1111-1111-111111111111/vehicles/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1/risk-assessments
+Authorization: Bearer {{token}}
+
+### Single campaign (target of the Location header)
+GET http://localhost:8082/api/v1/campaigns/f1111111-1111-1111-1111-111111111111
+Authorization: Bearer {{token}}
+
+### Business rule: lead for customer without consent -> 422
+POST http://localhost:8082/api/v1/leads
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "customerId": "55555555-5555-5555-5555-555555555555",
+  "vehicleId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5",
+  "title": "Revisao atrasada",
+  "action": "Ligar para o cliente",
+  "priority": "HIGH"
+}
+
+### Error: vehicle of another customer -> 404
+POST http://localhost:8082/api/v1/customers/11111111-1111-1111-1111-111111111111/vehicles/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2/risk-assessments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "score": 50,
+  "reasons": "Teste",
+  "recommendedAction": "Teste",
+  "modelName": "predit-retention-model",
+  "modelVersion": "1.1.0"
+}
+
+### Error: malformed JSON -> 400 problem+json
+POST http://localhost:8082/api/v1/campaigns
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ bad json
+
+### Error: unsupported method -> 405
+DELETE http://localhost:8082/api/v1/campaigns
+Authorization: Bearer {{token}}
+
+### Error: no token -> 401
+GET http://localhost:8082/api/v1/dashboard/summary

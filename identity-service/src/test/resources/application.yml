@@ -18,3 +18,5 @@ predit:
   bootstrap:
     admin-email: admin@test.com
     admin-password: Test123!
+  rate-limit:
+    requests-per-minute: 1000

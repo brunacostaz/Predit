@@ -25,6 +25,11 @@ public class CampaignService {
         return campaigns.findAllByOrderByCreatedAtDesc().stream().map(CampaignResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
+    public CampaignResponse find(UUID id) {
+        return CampaignResponse.from(campaigns.findById(id).orElseThrow(() -> new NotFoundException("Campaign not found")));
+    }
+
     @Transactional
     public CampaignResponse create(CreateCampaignRequest request) {
         Campaign campaign = campaigns.save(new Campaign(request.name(), request.description(), request.segment(),
